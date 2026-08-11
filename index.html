@@ -5,60 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chaayakkadi History</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas for Image Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-md: 0.75rem;
+            --radius-sm: 0.5rem;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: #ffffff;
+            background: var(--card-bg);
             padding: 20px;
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        header { text-align: center; margin-bottom: 20px; color: #4f46e5; font-size: 1.5rem; font-weight: bold; }
+        header { text-align: center; margin-bottom: 20px; color: var(--primary); font-size: 1.5rem; font-weight: bold; }
+        
+        /* Table Styles */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #f8fafc; font-weight: 600; color: #64748b; text-transform: uppercase; font-size: 0.75rem; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: var(--bg-color); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; }
+        
+        /* Loader */
         .spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5;
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
             border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Buttons */
+        button {
+            font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-view { background-color: rgba(79, 70, 229, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; }
+        .btn-view:hover { background-color: var(--primary); color: white; }
+        .btn-outline { background-color: transparent; border: 2px solid var(--border); color: var(--text-main); padding: 12px 20px; border-radius: var(--radius-sm); width: 100%; font-size: 1rem; }
+        .btn-outline:hover { background-color: var(--bg-color); }
+        .btn-secondary { background-color: var(--text-muted); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 1rem; width: 100%; margin-top: 15px;}
+        .btn-secondary:hover { background-color: #475569; }
+
+        /* Receipt Capture Area */
+        .receipt-container {
+            background: #fff; padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border);
+            color: #000; margin-bottom: 20px;
+        }
+        .receipt-header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; }
+        .receipt-section-title { margin: 15px 0 10px 0; font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+        .receipt-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .receipt-row:last-child { border-bottom: none; }
+        .receipt-row.bold { font-weight: 700; border-top: 2px solid #ccc; border-bottom: none; margin-top: 10px; padding-top: 15px; font-size: 1.1rem; }
+
+        /* Views hiding */
+        #receipt-view { display: none; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>☕ Chaayakkadi Event History</header>
+        <header>☕ Chaayakkadi Events</header>
         
         <div id="loader" style="text-align: center;">
             <div class="spinner"></div>
             <p>Loading latest events...</p>
         </div>
 
-        <div class="table-responsive" id="table-container" style="display: none;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Host</th>
-                        <th>Treat Type</th>
-                        <th>Pax</th>
-                        <th>Amount (₹)</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body">
-                    <!-- Data injected here -->
-                </tbody>
-            </table>
+        <!-- HISTORY VIEW -->
+        <div id="history-view" style="display: none;">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Host</th>
+                            <th>Treat Type</th>
+                            <th>Amount</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Data injected here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- RECEIPT VIEW (Hidden by default) -->
+        <div id="receipt-view">
+            <div id="receipt-capture" class="receipt-container">
+                <div class="receipt-header">
+                    <h3 style="justify-content: center; margin: 0 0 5px 0;">☕ Chaayakkadi Treat</h3>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;" id="receipt-meta">Date • Host • Treat Type</div>
+                </div>
+                
+                <!-- Individual Details -->
+                <h4 class="receipt-section-title">👥 Participant Details</h4>
+                <div id="receipt-items" style="margin-bottom: 20px;">
+                    <!-- Individual Items injected here -->
+                </div>
+
+                <!-- Vendor Summary -->
+                <h4 class="receipt-section-title">🛒 For Vendor (Summary)</h4>
+                <div id="vendor-items">
+                    <!-- Aggregated Vendor Items injected here -->
+                </div>
+                
+                <div class="receipt-row bold">
+                    <span>Total (<span id="receipt-pax">0</span> Pax)</span>
+                    <span>₹<span id="receipt-total">0</span></span>
+                </div>
+            </div>
+
+            <button onclick="downloadImage()" class="btn-outline">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download PNG Image
+            </button>
+            
+            <button onclick="showHistory()" class="btn-secondary">← Back to History</button>
+        </div>
+
     </div>
 
     <script>
@@ -68,6 +150,8 @@
         const SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE';
         // ==========================================
 
+        let globalEventsData = []; // Store data so we can view details without re-fetching
+
         function formatHistoryDate(dateStr) {
             if (!dateStr) return '';
             const d = new Date(dateStr);
@@ -76,36 +160,122 @@
         }
 
         async function fetchHistory() {
+            if(SCRIPT_URL === 'YOUR_WEB_APP_URL_HERE') {
+                document.getElementById('loader').innerHTML = `<p style="color:red;">Developer Error: Please add the Web App URL in the code.</p>`;
+                return;
+            }
+
             try {
                 let response = await fetch(SCRIPT_URL);
                 let data = await response.json();
                 
-                let events = data.events || [];
-                events.sort((a,b) => b.id - a.id); // Newest first
+                globalEventsData = data.events || [];
+                
+                // Parse the stringified participants array from Google Sheets
+                globalEventsData.forEach(e => {
+                    if (typeof e.participants === 'string') {
+                        try { e.participants = JSON.parse(e.participants); } catch(err){}
+                    }
+                });
 
-                const tbody = document.getElementById('history-table-body');
-                tbody.innerHTML = events.map(e => `
-                    <tr>
-                        <td>${formatHistoryDate(e.date)}</td>
-                        <td style="font-weight: 500;">${e.hostName}</td>
-                        <td><span style="background: #f8fafc; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #e2e8f0;">${e.treatType}</span></td>
-                        <td>${e.totalParticipants}</td>
-                        <td style="color: #10b981; font-weight: 700;">₹${e.totalAmount}</td>
-                    </tr>
-                `).join('');
+                globalEventsData.sort((a,b) => b.id - a.id); // Newest first
 
-                if (events.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">No events recorded yet.</td></tr>`;
-                }
-
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('table-container').style.display = 'block';
+                renderTable();
 
             } catch(e) {
                 document.getElementById('loader').innerHTML = `<p style="color:red;">Failed to load data. Please try again later.</p>`;
             }
         }
 
+        function renderTable() {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = globalEventsData.map(e => `
+                <tr>
+                    <td>${formatHistoryDate(e.date)}</td>
+                    <td style="font-weight: 500;">${e.hostName}</td>
+                    <td><span style="background: var(--bg-color); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid var(--border);">${e.treatType}</span></td>
+                    <td style="color: var(--success); font-weight: 700;">₹${e.totalAmount}</td>
+                    <td><button onclick="viewEvent(${e.id})" class="btn-view">View</button></td>
+                </tr>
+            `).join('');
+
+            if (globalEventsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No events recorded yet.</td></tr>`;
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('history-view').style.display = 'block';
+        }
+
+        function viewEvent(eventId) {
+            // Find the specific event data
+            const event = globalEventsData.find(e => e.id === eventId);
+            if (!event) return;
+
+            // 1. Setup Header Meta
+            document.getElementById('receipt-meta').innerHTML = `${formatHistoryDate(event.date)} <br> Host: <b>${event.hostName}</b> <br> Treat: ${event.treatType}`;
+            
+            // 2. Setup Participant Details
+            let participants = event.participants || [];
+            const listContainer = document.getElementById('receipt-items');
+            listContainer.innerHTML = participants.map(m => `
+                <div class="receipt-row">
+                    <div><b>${m.memberName || m.name}</b> <br><span style="font-size:0.8rem; color:var(--text-muted)">${m.foodName}</span></div>
+                    <div>₹${m.rate}</div>
+                </div>
+            `).join('');
+
+            // 3. Setup Vendor Summary Aggregation
+            const foodCounts = {};
+            participants.forEach(m => {
+                if(foodCounts[m.foodName]) {
+                    foodCounts[m.foodName].count += 1;
+                    foodCounts[m.foodName].totalRate += m.rate;
+                } else {
+                    foodCounts[m.foodName] = { count: 1, rate: m.rate, totalRate: m.rate };
+                }
+            });
+
+            const vendorContainer = document.getElementById('vendor-items');
+            vendorContainer.innerHTML = Object.keys(foodCounts).map(foodName => {
+                const item = foodCounts[foodName];
+                return `
+                <div class="receipt-row">
+                    <div><b>${foodName}</b> x ${item.count} <br><span style="font-size:0.8rem; color:var(--text-muted)">₹${item.rate} each</span></div>
+                    <div>₹${item.totalRate}</div>
+                </div>
+                `;
+            }).join('');
+            
+            // 4. Totals
+            document.getElementById('receipt-pax').innerText = event.totalParticipants;
+            document.getElementById('receipt-total').innerText = event.totalAmount;
+
+            // 5. Switch Views
+            document.getElementById('history-view').style.display = 'none';
+            document.getElementById('receipt-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHistory() {
+            document.getElementById('receipt-view').style.display = 'none';
+            document.getElementById('history-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function downloadImage() {
+            const captureArea = document.getElementById('receipt-capture');
+            html2canvas(captureArea, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+                const link = document.createElement('a');
+                // Format name like "Receipt_12-Aug-2026.png"
+                const dateText = document.getElementById('receipt-meta').innerText.split('Host:')[0].trim().replace(/ /g, '-');
+                link.download = `Chaayakkadi_Treat_${dateText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // Start Fetch
         fetchHistory();
     </script>
 </body>
